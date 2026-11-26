@@ -27,7 +27,7 @@ def build_vocab(sentences, min_freq = 2, max_size = 20000):
 
 def encode(sentence, word2idx, add_sos_eos = False):
   ids = [word2idx.get(w, UNK_IDX) for w in clean_text(sentence).split()]
-  return [SOS_IDX] + ids + [EOS_IDX if add_sos_eos else ids]
+  return [SOS_IDX] + ids + [EOS_IDX] if add_sos_eos else ids
 
 class NMTDataset(Dataset):
   def __init__(self, pairs, eng_word2idx, spa_word2idx):
