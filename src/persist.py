@@ -7,7 +7,7 @@ def save_experiment(model, optimizer, history, model_name, save_dir):
   torch.save(ck, os.path.join(save_dir, f"{model_name}.pt"))
   print(f"Checkpoint guardado en Drive: {model_name}.pt")
 
-def lead_experimment(model, model_name, save_dir, device = 'cuda'):
+def load_experimment(model, model_name, save_dir, device = 'cuda'):
   ck = torch.load(os.path.join(save_dir, f"{model_name}.pt"), map_location = device)
   model.load_state_dict(ck['model_state_dict'])
   model.to(device).eval()
