@@ -32,7 +32,7 @@ def encode(sentence, word2idx, add_sos_eos = False):
 class NMTDataset(Dataset):
   def __init__(self, pairs, eng_word2idx, spa_word2idx):
     self.src = [torch.tensor(encode(en, eng_word2idx)) for en, _ in pairs]
-    self.tgt = [torch.tensor(encode(es, spa_word2idx, add_sos_eos = True)) for es, _ in pairs]
+    self.tgt = [torch.tensor(encode(es, spa_word2idx, add_sos_eos = True)) for _, es in pairs]
 
   def __len__(self):
     return len(self.src)
