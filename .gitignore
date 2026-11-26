@@ -1,0 +1,29 @@
+# Datos (se descargan con el wget del protocolo, no se versionan)
+spa.txt
+spa-eng.zip
+_about.txt
+*.zip
+
+# Pesos de modelos y checkpoints (viven en Google Drive)
+*.pt
+*.pth
+*.bin
+*.safetensors
+checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+
+# Credenciales y archivos locales (nunca subir)
+.env
+*.key
+.DS_Store
+.vscode/
+.idea/
