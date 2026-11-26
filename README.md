@@ -4,4 +4,7 @@
 ## Objetivo
 El objetivo del proyecto es construir cuatro arquitecturas de aprendizaje profundo para la tarea de **Traducción Automática Neuronal (NMT)** del inglés al español (EN \rightarrow ES). A través de este estudio empírico, el equipo analizará el impacto del sesgo inductivo secuencial frente a los mecanismos de autoatención pura desde cero y la ganancia obtenida mediante Transfer Learning y ajuste fino (*Fine-Tuning*) a partir de los modelos preentrenados a gran escala.
 
+## ID SHA-256
+SHA-256 Test Audit ID: dbac04ac5648
+
 ## Secciones del Proyecto
