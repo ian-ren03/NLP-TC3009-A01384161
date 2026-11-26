@@ -63,7 +63,7 @@ class BucketSampler:
       batches += [c[k:k + self.bs] for k in range(0, len(c), self.bs)]
     if self.shuffle:
       random.shuffle(batches)
-      yield from batches
+    yield from batches
   
   def __len__(self):
     return (len(self.lengths) + self.bs - 1) // self.bs
