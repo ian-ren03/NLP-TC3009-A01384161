@@ -59,7 +59,7 @@ class BucketSampler:
     size = self.bs * self.chunk
     batches = []
     for i in range(0, len(idx), size):
-      c = sorted(idx[i:i + size], key = lambda j: self.legths[j])
+      c = sorted(idx[i:i + size], key = lambda j: self.lengths[j])
       batches += [c[k:k + self.bs] for k in range(0, len(c), self.bs)]
     if self.shuffle:
       random.shuffle(batches)
