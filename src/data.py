@@ -53,17 +53,17 @@ class BucketSampler:
     self.lengths, self.bs, self.shuffle, self.chunk = lengths, batch_size, shuffle, chunk
 
   def __iter__(self):
-    idx = list(range(len(self.lenghts)))
+    idx = list(range(len(self.lengths)))
     if self.shuffle:
       random.shuffle(idx)
     size = self.bs * self.chunk
-    bathces = []
+    batches = []
     for i in range(0, len(idx), size):
-      c = sorted(idx[i:i + size], key = lambda j: self.leghts[j])
+      c = sorted(idx[i:i + size], key = lambda j: self.legths[j])
       batches += [c[k:k + self.bs] for k in range(0, len(c), self.bs)]
     if self.shuffle:
-      random.shuffle(bathces)
+      random.shuffle(batches)
       yield from batches
   
   def __len__(self):
-    return (len(self.lenghths) + self.bs - 1) // self.bs
+    return (len(self.lengths) + self.bs - 1) // self.bs
