@@ -1,1 +1,10 @@
-
+torch
+numpy
+pandas
+matplotlib
+tqdm
+sacrebleu
+transformers
+sentencepiece
+sacremoses
+accelerate
