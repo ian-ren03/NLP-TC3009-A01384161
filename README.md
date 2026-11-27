@@ -50,4 +50,83 @@ Las tasas de `<unk>` son mayores en validation y test porque el vocabulario se c
 ### Limitación conocida: oraciones repetidas entre train y test
 
 Tatoeba contiene varias traducciones al español para una misma oración en inglés. Como resultado, **564 de 3 642 oraciones de test (15.5 %)** tienen una fuente en inglés que también aparece en train (con otra traducción posible al español). La partición no se modificó, por requerimiento del protocolo. Esto puede favorecer a los modelos con mayor capacidad de memorización, por lo que en la evaluación se reporta, además de la tabla oficial, el BLEU sobre el subconjunto de test cuya fuente no aparece en train.
-## Secciones del Proyecto
+
+
+## Modelo A: BiLSTM Encoder–Decoder con atención (desde cero)
+
+**Implementación:** PyTorch, en `src/models_a.py`. Notebook: `notebooks/01_modelo_A_bilstm_atencion.ipynb`.
+
+### Arquitectura
+
+- **Encoder:** embedding (`padding_idx=0`) + `nn.LSTM` bidireccional de 1 capa, con `pack_padded_sequence` / `pad_packed_sequence` para ignorar el padding.
+- **Puente:** los estados finales forward y backward (2H) se concatenan y se proyectan a H (capa lineal + `tanh`) para inicializar el decoder.
+- **Atención de producto punto (estilo Luong):** las salidas del encoder se proyectan a la dimensión del decoder; los scores se enmascaran en las posiciones de padding antes del softmax. El contexto se calcula como `c_i = Σ_j α_ij h_j^e`.
+- **Decoder:** LSTM autorregresivo de 1 capa; se combinan `[c_i ; h_i]` con una capa lineal + `tanh`, y una capa final produce los logits sobre el vocabulario en español.
+- **Entrenamiento:** teacher forcing, con el target desplazado un paso (`tgt_in` / `tgt_out`).
+
+### Hiperparámetros
+
+| Parámetro | Valor |
+|---|---|
+| Embedding / hidden | 256 / 256 |
+| Dropout | 0.3 |
+| Optimizador | Adam, lr = 1e-3 |
+| Gradient clipping | 1.0 |
+| Batch | 64 (agrupado por longitud) |
+| Precisión | mixed precision (fp16) |
+| Pérdida | CrossEntropy, `ignore_index=0`, promediada por token |
+| Early stopping | paciencia 5 sobre `val_loss` (máx. 30 épocas) |
+| Semilla | 23 |
+| **Parámetros entrenables** | **7,683,419** |
+
+### Resultados de entrenamiento
+
+| Métrica | Valor |
+|---|---|
+| Mejor época | 18 |
+| Train loss en la mejor época | 1.2022 |
+| Val loss (mejor) | 1.8355 (perplejidad ≈ 6.3) |
+| Parada por early stopping | época 23 |
+| Tiempo por época (GPU) | ≈ 8 s |
+
+![Curvas de aprendizaje del Modelo A](figures/curvas_modeloA.png)
+
+**Diagnóstico:** la validación converge hacia la época 18 y se mantiene plana (≈ 1.83–1.85) hasta el final, mientras la pérdida de entrenamiento sigue bajando hasta 1.06. La brecha entre ambas crece de casi 0 (época 7) a ≈ 0.8 (época 23), señal de sobreajuste moderado. Para la evaluación se usa el checkpoint de la mejor época (`modeloA_best`). La pérdida de train se mide con dropout activo y la de validación sin él.
+
+### Verificación preliminar en validación
+
+Evaluación rápida con decodificación greedy (`max_len = 60`) sobre las primeras 500 oraciones de **validación** (el conjunto de test no se ha usado):
+
+| Conjunto | BLEU (sacrebleu) |
+|---|---|
+| 500 oraciones de validación | 33.77 |
+| Solo oraciones cuya fuente no aparece en train (432/500) | 32.44 |
+
+- Las oraciones con fuente repetida en train inflan ligeramente el BLEU (≈ 1.3 puntos).
+- 159 tokens `<unk>` aparecen en las salidas (3.3 % de las palabras generadas). La regla de conteo de `<unk>` para el BLEU final se fijará en la evaluación del Día 5.
+
+Ejemplos (validación, texto normalizado):
+
+| | Texto |
+|---|---|
+| EN | Tom told me he was able to speak three languages. |
+| Referencia | tom me dijo que era capaz de hablar tres idiomas |
+| Modelo A | tom me dijo que estaba capaz de hablar tres idiomas |
+| EN | I looked for the key under the welcome mat and in the nearby flower pot. |
+| Referencia | busque la llave bajo la alfombra de bienvenida y en la maceta de al lado |
+| Modelo A | busque por la llave debajo del rio `<unk>` y en el cruce `<unk>` |
+
+El primer ejemplo muestra una confusión ser/estar; el segundo, el efecto de las palabras raras (`welcome mat`, `flower pot`) en un vocabulario a nivel de palabra, que caen en `<unk>` y llevan al decoder a generar texto incorrecto.
+
+> Estos resultados son preliminares y de validación. La evaluación oficial en test (Tabla 1) se hará una sola vez, tras entrenar los cuatro modelos.
+
+## Estado del proyecto
+
+| Componente | Estado |
+|---|---|
+| Datos, protocolo y auditoría (SHA-256) | Completado |
+| Modelo A: BiLSTM + atención | Entrenado |
+| Modelo B: Transformer compacto | Pendiente |
+| Modelo C: Transformer base | Pendiente |
+| Modelo D: fine-tuning | Pendiente |
+| Evaluación en test y Tabla 1 | Pendiente |
