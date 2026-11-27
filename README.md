@@ -96,11 +96,14 @@ Tatoeba contiene varias traducciones al español para una misma oración en ingl
 ### Verificación preliminar en validación
 
 Evaluación rápida con decodificación greedy (`max_len = 60`) sobre las primeras 500 oraciones de **validación** (el conjunto de test no se ha usado):
-
+- Las oraciones con fuente repetida en train inflan ligeramente el BLEU (≈ 1.4 puntos: 35.94 vs 34.54).
+- 
 | Conjunto | BLEU (sacrebleu) |
 |---|---|
-| 500 oraciones de validación | 33.77 |
-| Solo oraciones cuya fuente no aparece en train (432/500) | 32.44 |
+| 500 oraciones de validación | 35.94 |
+| Solo oraciones cuya fuente no aparece en train (432/500) | 34.54 |
+
+- 159 tokens `<unk>` aparecen en las salidas (3.3 % de las palabras generadas). Para el BLEU, `<unk>` se reemplaza por `unk` antes de evaluar, de modo que cada token desconocido cuente como un solo error. Sin esa regla, `sacrebleu` lo divide en tres tokens (`<`, `unk`, `>`), lo que infla la longitud de la hipótesis y penaliza el BLEU (33.77 sin la regla). La misma regla se aplica a los modelos A, B y C.
 
 - Las oraciones con fuente repetida en train inflan ligeramente el BLEU (≈ 1.3 puntos).
 - 159 tokens `<unk>` aparecen en las salidas (3.3 % de las palabras generadas). La regla de conteo de `<unk>` para el BLEU final se fijará en la evaluación del Día 5.
